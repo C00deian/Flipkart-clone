@@ -1,0 +1,24 @@
+# Compiled Java Files
+**/target/
+**.class
+
+# IntelliJ & IDE Files (Ye personal settings hoti hain)
+.idea/
+**/*.iml
+.vscode/
+
+# Logs
+**/logs/
+*.log
+
+# Maven Wrapper (Optional - rakh bhi sakte hain, par aksar hate dete hain)
+.mvn/
+mvnw
+mvnw.cmd
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Environment Secrets (Security ke liye)
+.env
