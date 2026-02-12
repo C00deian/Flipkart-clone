@@ -1,0 +1,134 @@
+{
+  "uid": "flipkart-observability",
+  "title": "Flipkart Observability",
+  "tags": ["jvm", "http", "hikari", "resilience4j"],
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "timezone": "browser",
+  "time": { "from": "now-1h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "type": "query",
+        "name": "application",
+        "label": "Application",
+        "datasource": { "type": "prometheus", "uid": "Prometheus" },
+        "query": "label_values(jvm_info, application)",
+        "refresh": 1,
+        "multi": false,
+        "includeAll": false,
+        "current": { "selected": false, "text": "auth-service", "value": "auth-service" }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "HTTP RPS",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(http_server_requests_seconds_count{application=\"$application\"}[1m]))",
+          "legendFormat": "rps"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP Avg Latency (ms)",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "1000 * (sum(rate(http_server_requests_seconds_sum{application=\"$application\"}[1m])) / sum(rate(http_server_requests_seconds_count{application=\"$application\"}[1m])))",
+          "legendFormat": "avg_ms"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "JVM Heap Used (bytes)",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(jvm_memory_used_bytes{application=\"$application\",area=\"heap\"})",
+          "legendFormat": "heap_used"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "JVM Live Threads",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "jvm_threads_live_threads{application=\"$application\"}",
+          "legendFormat": "threads"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Hikari Connections (active/idle)",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "hikaricp_connections_active{application=\"$application\"}",
+          "legendFormat": "active"
+        },
+        {
+          "refId": "B",
+          "expr": "hikaricp_connections_idle{application=\"$application\"}",
+          "legendFormat": "idle"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Resilience4j CircuitBreaker State (userService)",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "resilience4j_circuitbreaker_state{application=\"$application\",name=\"userService\",state=\"closed\"}",
+          "legendFormat": "closed"
+        },
+        {
+          "refId": "B",
+          "expr": "resilience4j_circuitbreaker_state{application=\"$application\",name=\"userService\",state=\"open\"}",
+          "legendFormat": "open"
+        },
+        {
+          "refId": "C",
+          "expr": "resilience4j_circuitbreaker_state{application=\"$application\",name=\"userService\",state=\"half_open\"}",
+          "legendFormat": "half_open"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Resilience4j Retry Calls (by kind)",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 24 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(resilience4j_retry_calls_total{application=\"$application\"}) by (name,kind)"
+        }
+      ],
+      "options": { "showHeader": true }
+    }
+  ]
+}
+
