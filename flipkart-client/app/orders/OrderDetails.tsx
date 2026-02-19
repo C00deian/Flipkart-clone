@@ -1,0 +1,81 @@
+
+"use client"
+import React from 'react'
+import { Heading } from '../components/Heading'
+import { formatePrice } from '../utils/formatePrice'
+import { MdAccessTimeFilled, MdDeliveryDining, MdDone } from 'react-icons/md'
+import { Status } from '../components/Status'
+import { Orders } from '@/app/types/OrderTypes'
+import moment from 'moment'
+import OrderItem from './OrderItem'
+
+interface OrderDetailsProps {
+    order: Orders
+}
+export const OrderDetails: React.FC<OrderDetailsProps> = ({
+    order
+}) => {
+
+    return (
+        <div className='max-w-[1150px] m-auto flex flex-col gap-2'>
+            <div className='mt-8'>
+                <Heading
+                    title='Order Details'
+                />
+            </div>
+            <div>
+                Order ID :{order.id}
+            </div>
+            <div>Total Amount : <span className='font-bold'>{formatePrice(order.totalPrice)}</span></div>
+            <div className='flex gap-2 items-center'>
+                <div>Payment status : </div>
+                <div>
+                    {order.paymentStatus === 'SUCCESS' ? (
+                        <Status
+                            text='Paid'
+                            icon={MdDone}
+                            bg='bg-green-200'
+                            color='text-green-700'
+                        />
+                    ) : (
+                        <Status
+                            text='Pending'
+                            icon={MdAccessTimeFilled}
+                            bg='bg-rose-200'
+                            color='text-rose-700'
+                        />
+                    )}
+                </div>
+            </div>
+            <div className='flex gap-2 items-center'>
+                <div>Delivery status : </div>
+                {order.orderStatus === 'DELIVERED' && (
+                    <Status text='Delivered' icon={MdDone} bg='bg-green-200' color='text-green-700' />
+                )}
+                {order.orderStatus === 'SHIPPED' && (
+                    <Status text='Dispatched' icon={MdDeliveryDining} bg='bg-purple-200' color='text-purple-700' />
+                )}
+                {(order.orderStatus === 'PLACED' || order.orderStatus === 'PENDING') && (
+                    <Status text='Pending' icon={MdAccessTimeFilled} bg='bg-slate-200' color='text-slate-700' />
+                )}
+            </div>
+            <div>Date : {moment(order.orderDate).fromNow()}</div>
+            <h2 className='font-semibold mt-4 mb-2'>Products Ordered</h2>
+            <div className='grid grid-cols-5 text-xs gap-4 pb-2 items-center'>
+                <div className='col-span-2 justify-self-start '>PRODUCT</div>
+                <div className='justify-self-center'>PRICE</div>
+
+                <div className='justify-self-center'>  QTY</div>
+
+                <div className='justify-self-end'>TOTAL</div>
+
+            </div>
+            {order.items.map((item) => {
+                return <OrderItem item={item} key={item.productId} />
+            })}
+
+        </div>
+    )
+
+
+}
